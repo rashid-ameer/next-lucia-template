@@ -17,7 +17,6 @@ model User {
   googleId     String?
   githubId     String?
   username     String?
-  name         String
   email        String  @unique
   passwordHash String
   avatarUrl    String?

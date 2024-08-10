@@ -1,0 +1,30 @@
+import React from "react";
+import { Button, ButtonProps } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
+import { AnimatedSpinner } from "@/components/icons";
+
+type LoadingButtonProps = ButtonProps & {
+  loading?: boolean;
+};
+
+const LoadingButton = React.forwardRef<HTMLButtonElement, LoadingButtonProps>(
+  ({ loading = false, children, className, ...props }, ref) => {
+    return (
+      <Button
+        ref={ref}
+        disabled={props.disabled || loading}
+        className={cn("relative", className)}
+        {...props}>
+        <span className={cn(loading ? "opacity-0" : "")}>{children}</span>
+
+        <div className="absolute inset-0">
+          <AnimatedSpinner className="size-6" />
+        </div>
+      </Button>
+    );
+  }
+);
+
+LoadingButton.displayName = "LoadingButton";
+
+export default LoadingButton;

@@ -9,8 +9,12 @@ import { Input } from "@/components/ui/input";
 import PasswordInput from "@/components/auth/password-input";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import SubmitButton from "@/components/auth/submit-button";
+import { useTransition } from "react";
 
 function SignupForm() {
+  const [isPending, startTransition] = useTransition();
+
   const form = useForm<SignupFormValues>({
     resolver: zodResolver(signupFormSchema),
     defaultValues: {
@@ -21,9 +25,7 @@ function SignupForm() {
   });
 
   // submit handler
-  const handleSubmit = (data: SignupFormValues) => {
-    console.log(data);
-  };
+  const handleSubmit = (data: SignupFormValues) => {};
 
   return (
     <Form {...form}>
@@ -86,7 +88,7 @@ function SignupForm() {
           <Link href="/login">Already signed up? Login instead</Link>
         </Button>
 
-        <Button type="submit">Sign up</Button>
+        <SubmitButton type="submit">Sign up</SubmitButton>
       </form>
     </Form>
   );

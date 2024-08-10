@@ -1,5 +1,7 @@
 import { validateRequest } from "@/auth";
 import { SignupForm } from "@/components";
+import OAuthButtons from "@/components/auth/oauth-buttons";
+import Seperator from "@/components/auth/seperator";
 import { GitHubLogoIcon, GoogleLogoIcon } from "@/components/icons";
 import { Button } from "@/components/ui/button";
 import {
@@ -33,28 +35,15 @@ async function Signup() {
       </CardHeader>
       <CardContent>
         {/* auth buttons */}
-        <div className="flex gap-2 flex-wrap">
-          <Button
-            variant="outline"
-            className="flex-1">
-            <GitHubLogoIcon className="size-5 mr-2" />
-            Signup with GitHub
-          </Button>
-          <Button
-            variant="outline"
-            className="flex-1">
-            <GoogleLogoIcon className="size-5 mr-2" />
-            Signup with Google
-          </Button>
-        </div>
+        <OAuthButtons
+          className="flex-wrap"
+          googleText="Signup with Google"
+          githubText="Signup with GitHub"
+        />
 
         {/* seperator */}
 
-        <div className="flex items-center py-2">
-          <div className="flex-1 h-px bg-gray-200" />
-          <div className="mx-2 text-gray-500">or</div>
-          <div className="flex-1 h-px bg-gray-200" />
-        </div>
+        <Seperator />
         {/* signup form */}
         <SignupForm />
       </CardContent>
