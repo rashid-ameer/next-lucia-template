@@ -88,7 +88,7 @@ function LoginForm() {
             variant="link"
             className="px-0 focus-visible:ring-0 focus-visible:underline"
             asChild>
-            <Link href="/reset-password">Forgot Password?</Link>
+            <Link href="/forgot-password">Forgot Password?</Link>
           </Button>
         </div>
 
