@@ -3,6 +3,7 @@ import { sendEmail } from "@/lib/email";
 import { User } from "lucia";
 import prisma from "./prisma";
 import { isWithinExpirationDate } from "oslo";
+import { lucia } from "@/auth";
 
 export async function sendSignupVerificationEmail(
   email: string,
