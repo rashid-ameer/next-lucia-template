@@ -14,6 +14,8 @@ import { cookies } from "next/headers";
 import { redirect, RedirectType } from "next/navigation";
 import { PATHS } from "@/lib/constants";
 import {
+  createSessionAndCookie,
+  deleteSessionCookie,
   sendSignupVerificationEmail,
   verifyVerificationCode,
 } from "@/lib/server-utils";
@@ -53,14 +55,7 @@ export async function signup(data: unknown) {
   const verificationCode = await generateEmailVerificationCode(userId, email);
   await sendSignupVerificationEmail(email, verificationCode);
 
-  const session = await lucia.createSession(userId, {});
-  const sessionCookie = lucia.createSessionCookie(session.id);
-
-  cookies().set(
-    sessionCookie.name,
-    sessionCookie.value,
-    sessionCookie.attributes
-  );
+  createSessionAndCookie(userId);
 
   return redirect(PATHS.VERIFY_EMAIL, RedirectType.replace);
 }
@@ -86,7 +81,7 @@ export async function login(data: unknown) {
   }
 
   // verify password
-  const isValidPassword = await verify(user.passwordHash, password, {
+  const isValidPassword = await verify(user.passwordHash!, password, {
     // recommended minimum parameters
     memoryCost: 19456,
     timeCost: 2,
@@ -98,14 +93,7 @@ export async function login(data: unknown) {
     return { success: false, message: "Incorrect email or password" };
   }
 
-  const session = await lucia.createSession(user.id, {});
-  const sessionCookie = lucia.createSessionCookie(session.id);
-
-  cookies().set(
-    sessionCookie.name,
-    sessionCookie.value,
-    sessionCookie.attributes
-  );
+  createSessionAndCookie(user.id);
 
   return redirect(PATHS.HOME, RedirectType.replace);
 }
@@ -117,12 +105,7 @@ export async function logout() {
   }
 
   await lucia.invalidateSession(session.id);
-  const sessionCookie = lucia.createBlankSessionCookie();
-  cookies().set(
-    sessionCookie.name,
-    sessionCookie.value,
-    sessionCookie.attributes
-  );
+  deleteSessionCookie();
   return redirect(PATHS.LOGIN);
 }
 

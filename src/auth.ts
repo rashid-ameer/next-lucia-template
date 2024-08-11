@@ -4,6 +4,7 @@ import { Lucia } from "lucia";
 import { cache } from "react";
 import { GitHub, Google } from "arctic";
 import { cookies } from "next/headers";
+import { createSessionCookie, deleteSessionCookie } from "./lib/server-utils";
 
 // creating instance of prisma adapter
 const prismaAdapter = new PrismaAdapter(prisma.session, prisma.user);
@@ -57,21 +58,11 @@ export const validateRequest = cache(async () => {
   // next.js throws when you attempt to set cookie when rendering page
   try {
     if (result.session && result.session.fresh) {
-      const sessionCookie = lucia.createSessionCookie(result.session.id);
-      cookies().set(
-        sessionCookie.name,
-        sessionCookie.value,
-        sessionCookie.attributes
-      );
+      createSessionCookie(result.session.id);
     }
 
     if (!result.session) {
-      const sessionCookie = lucia.createBlankSessionCookie();
-      cookies().set(
-        sessionCookie.name,
-        sessionCookie.value,
-        sessionCookie.attributes
-      );
+      deleteSessionCookie();
     }
   } catch {}
   return result;

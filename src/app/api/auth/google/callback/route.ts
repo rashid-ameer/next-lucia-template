@@ -1,6 +1,7 @@
 import { google, lucia } from "@/auth";
 import { createUser, getUserByEmail, updateUser } from "@/db/user";
 import { PATHS } from "@/lib/constants";
+import { createSessionAndCookie } from "@/lib/server-utils";
 import { OAuth2RequestError } from "arctic";
 import { generateIdFromEntropySize } from "lucia";
 import { cookies } from "next/headers";
@@ -57,13 +58,8 @@ export async function GET(request: NextRequest) {
         emailVerified: googleUser.verified_email,
       });
 
-      const session = await lucia.createSession(userId, {});
-      const sessionCookie = lucia.createSessionCookie(session.id);
-      cookies().set(
-        sessionCookie.name,
-        sessionCookie.value,
-        sessionCookie.attributes
-      );
+      createSessionAndCookie(userId);
+
       return new Response(null, {
         status: 302,
         headers: { Location: PATHS.HOME },
@@ -77,13 +73,8 @@ export async function GET(request: NextRequest) {
       emailVerified: existingUser.emailVerified || googleUser.verified_email,
     });
 
-    const session = await lucia.createSession(existingUser.id, {});
-    const sessionCookie = lucia.createSessionCookie(session.id);
-    cookies().set(
-      sessionCookie.name,
-      sessionCookie.value,
-      sessionCookie.attributes
-    );
+    createSessionAndCookie(existingUser.id);
+
     return new Response(null, {
       status: 302,
       headers: { Location: PATHS.HOME },
