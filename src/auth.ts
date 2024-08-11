@@ -23,6 +23,7 @@ export const lucia = new Lucia(prismaAdapter, {
       username: databaseUserAttributes.username,
       email: databaseUserAttributes.email,
       avatarUrl: databaseUserAttributes.avatarUrl,
+      emailVerified: databaseUserAttributes.emailVerified,
     };
   },
 });
@@ -40,6 +41,7 @@ interface DatabaseUserAttributes {
   name: string;
   email: string;
   avatarUrl: string | null;
+  emailVerified: boolean;
 }
 
 // validate the session

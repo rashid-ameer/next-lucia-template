@@ -16,7 +16,10 @@ export async function generateEmailVerificationCode(
   email: string
 ) {
   await deleteAllUserEmailVerificationCodes(userId);
-  const code = generateRandomString(6, alphabet("0-9", "A-Z"));
+  const codeLength = parseInt(
+    process.env.NEXT_PUBLIC_EMAIL_VERIFICATION_CODE_LENGTH!
+  );
+  const code = generateRandomString(codeLength, alphabet("0-9", "A-Z"));
   await createUserEmailVerificationCode({
     userId,
     email,

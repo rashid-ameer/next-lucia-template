@@ -17,9 +17,11 @@ const LoadingButton = React.forwardRef<HTMLButtonElement, LoadingButtonProps>(
         {...props}>
         <span className={cn(loading ? "opacity-0" : "")}>{children}</span>
 
-        <div className="absolute inset-0">
-          <AnimatedSpinner className="size-6" />
-        </div>
+        {loading ? (
+          <div className="absolute inset-0 flex items-center justify-center">
+            <AnimatedSpinner className="size-6" />
+          </div>
+        ) : null}
       </Button>
     );
   }

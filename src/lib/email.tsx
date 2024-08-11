@@ -8,14 +8,10 @@ export async function sendEmail(
   subject: string,
   body: React.ReactNode
 ) {
-  const { error } = await resend.emails.send({
+  await resend.emails.send({
     from: process.env.EMAIL_FROM!,
     to: email,
     subject,
     react: <>{body}</>,
   });
-
-  if (error) {
-    throw error;
-  }
 }

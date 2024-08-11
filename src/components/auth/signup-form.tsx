@@ -10,10 +10,13 @@ import PasswordInput from "@/components/auth/password-input";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import SubmitButton from "@/components/auth/submit-button";
-import { useTransition } from "react";
+import { useState, useTransition } from "react";
+import { signup } from "@/actions/auth";
+import FormServerError from "./form-error";
 
 function SignupForm() {
   const [isPending, startTransition] = useTransition();
+  const [error, setError] = useState("");
 
   const form = useForm<SignupFormValues>({
     resolver: zodResolver(signupFormSchema),
@@ -24,14 +27,31 @@ function SignupForm() {
     },
   });
 
-  // submit handler
-  const handleSubmit = (data: SignupFormValues) => {};
+  // handle submission
+  const handleSubmit = async (data: SignupFormValues) => {
+    startTransition(async () => {
+      const result = await signup(data);
+
+      if (!result) return;
+
+      if (result.error) {
+        setError(result.error);
+      }
+    });
+  };
 
   return (
     <Form {...form}>
       <form
         className="grid gap-4"
         onSubmit={form.handleSubmit(handleSubmit)}>
+        {!isPending && error && (
+          <FormServerError
+            message={error}
+            className="text-center"
+          />
+        )}
+
         <FormField
           name="username"
           control={form.control}
@@ -88,7 +108,11 @@ function SignupForm() {
           <Link href="/login">Already signed up? Login instead</Link>
         </Button>
 
-        <SubmitButton type="submit">Sign up</SubmitButton>
+        <SubmitButton
+          type="submit"
+          loading={isPending}>
+          Sign up
+        </SubmitButton>
       </form>
     </Form>
   );

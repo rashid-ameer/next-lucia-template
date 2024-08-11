@@ -9,8 +9,15 @@ import { Input } from "@/components/ui/input";
 import PasswordInput from "@/components/auth/password-input";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
+import { useState, useTransition } from "react";
+import FormServerError from "./form-error";
+import SubmitButton from "./submit-button";
+import { login } from "@/actions/auth";
 
 function LoginForm() {
+  const [isPending, startTransition] = useTransition();
+  const [error, setError] = useState("");
+
   const form = useForm<LoginFormValues>({
     resolver: zodResolver(loginFormSchema),
     defaultValues: {
@@ -21,7 +28,12 @@ function LoginForm() {
 
   // submit handler
   const handleSubmit = (data: LoginFormValues) => {
-    console.log(data);
+    startTransition(async () => {
+      const result = await login(data);
+      if (result && !result.success) {
+        setError(result.message);
+      }
+    });
   };
 
   return (
@@ -29,6 +41,13 @@ function LoginForm() {
       <form
         className="grid gap-4"
         onSubmit={form.handleSubmit(handleSubmit)}>
+        {isPending && error && (
+          <FormServerError
+            message={error}
+            className="text-center"
+          />
+        )}
+
         <FormField
           name="email"
           control={form.control}
@@ -73,7 +92,11 @@ function LoginForm() {
           </Button>
         </div>
 
-        <Button type="submit">Login</Button>
+        <SubmitButton
+          loading={isPending}
+          type="submit">
+          Login
+        </SubmitButton>
       </form>
     </Form>
   );
