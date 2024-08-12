@@ -60,6 +60,7 @@ function ResetPasswordForm({ token }: ResetPasswordFormProps) {
               <Label>New Password</Label>
               <PasswordInput
                 {...field}
+                disabled={isPending}
                 placeholder="********"
               />
               <FormMessage />

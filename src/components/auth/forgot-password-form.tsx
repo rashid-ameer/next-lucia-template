@@ -59,6 +59,7 @@ function ForgotPassowordForm() {
               <Input
                 {...field}
                 placeholder="email@example.com"
+                disabled={isPending}
               />
               <FormMessage />
             </FormItem>
