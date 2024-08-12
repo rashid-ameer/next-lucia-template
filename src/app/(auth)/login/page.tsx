@@ -12,8 +12,13 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { PATHS } from "@/lib/constants";
-import Link from "next/link";
+import { Metadata } from "next";
 import { redirect, RedirectType } from "next/navigation";
+
+export const metadata: Metadata = {
+  title: "Login",
+  description: "Login Page",
+};
 
 async function Login() {
   const { user } = await validateRequest();

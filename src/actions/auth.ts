@@ -15,17 +15,18 @@ import {
   verificationEmailCodeSchema,
 } from "@/lib/schemas";
 import { generateIdFromEntropySize } from "lucia";
-import { hash, verify } from "@node-rs/argon2";
 import { generateEmailVerificationCode } from "@/lib/utils";
 import { lucia, validateRequest } from "@/auth";
 import { cookies } from "next/headers";
 import { redirect, RedirectType } from "next/navigation";
 import { PATHS } from "@/lib/constants";
 import {
+  checkPasswordValidity,
   createPasswordResetToken,
   createSessionAndCookie,
   createSessionCookie,
   deleteSessionCookie,
+  getPasswordHash,
   sendResetPasswordEmail,
   sendSignupVerificationEmail,
   verifyVerificationCode,
@@ -57,13 +58,7 @@ export async function signup(data: unknown) {
   // generate the id of user
   const userId = generateIdFromEntropySize(10); // 16 characters long
   // generate password hash
-  const passwordHash = await hash(password, {
-    // recommended minimum parameters
-    memoryCost: 19456,
-    timeCost: 2,
-    outputLen: 32,
-    parallelism: 1,
-  });
+  const passwordHash = await getPasswordHash(password);
 
   await insertUser({ username, email, id: userId, passwordHash });
 
@@ -96,13 +91,10 @@ export async function login(data: unknown) {
   }
 
   // verify password
-  const isValidPassword = await verify(user.passwordHash!, password, {
-    // recommended minimum parameters
-    memoryCost: 19456,
-    timeCost: 2,
-    outputLen: 32,
-    parallelism: 1,
-  });
+  const isValidPassword = await checkPasswordValidity(
+    user.passwordHash!,
+    password
+  );
 
   if (!isValidPassword) {
     return { success: false, message: "Incorrect email or password" };
@@ -240,13 +232,7 @@ export async function resetPassword(data: unknown) {
   }
 
   await lucia.invalidateUserSessions(dbToken.userId);
-  const passwordHash = await hash(password, {
-    // recommended minimum parameters
-    memoryCost: 19456,
-    timeCost: 2,
-    outputLen: 32,
-    parallelism: 1,
-  });
+  const passwordHash = await getPasswordHash(password);
 
   await updateUser(dbToken.userId, { passwordHash });
 

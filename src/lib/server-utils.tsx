@@ -11,6 +11,7 @@ import {
 } from "@/db/user";
 import { encodeHex } from "oslo/encoding";
 import { sha256 } from "oslo/crypto";
+import { hash, verify } from "@node-rs/argon2";
 
 export async function sendSignupVerificationEmail(
   email: string,
@@ -100,4 +101,27 @@ export async function sendResetPasswordEmail(
   verificationLink: string
 ) {
   await sendEmail(email, "Password Rest Link", <p>{verificationLink}</p>);
+}
+
+export async function checkPasswordValidity(
+  passwordHash: string,
+  password: string
+) {
+  return verify(passwordHash, password, {
+    // recommended minimum parameters
+    memoryCost: 19456,
+    timeCost: 2,
+    outputLen: 32,
+    parallelism: 1,
+  });
+}
+
+export async function getPasswordHash(password: string) {
+  return hash(password, {
+    // recommended minimum parameters
+    memoryCost: 19456,
+    timeCost: 2,
+    outputLen: 32,
+    parallelism: 1,
+  });
 }
