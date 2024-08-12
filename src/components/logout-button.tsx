@@ -1,20 +1,27 @@
 "use client";
 
 import { logout } from "@/actions/auth";
-import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { useTransition } from "react";
+import LoadingButton from "./loading-button";
 
 type LogoutButtonProps = {
   className?: string;
 };
 
 function LogoutButton({ className }: LogoutButtonProps) {
+  const [isPending, startTransition] = useTransition();
   return (
-    <Button
-      onClick={async () => logout()}
+    <LoadingButton
+      loading={isPending}
+      onClick={() => {
+        startTransition(async () => {
+          await logout();
+        });
+      }}
       className={cn(className)}>
       Logout
-    </Button>
+    </LoadingButton>
   );
 }
 export default LogoutButton;

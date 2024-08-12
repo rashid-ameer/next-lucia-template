@@ -58,6 +58,7 @@ function LoginForm() {
               <Input
                 {...field}
                 placeholder="email@example.com"
+                disabled={isPending}
               />
               <FormMessage />
             </FormItem>
@@ -71,6 +72,7 @@ function LoginForm() {
               <Label>Password</Label>
               <PasswordInput
                 {...field}
+                disabled={isPending}
                 placeholder="********"
               />
               <FormMessage />
@@ -81,12 +83,14 @@ function LoginForm() {
         <div className="flex justify-between">
           <Button
             variant="link"
+            size="sm"
             className="px-0 focus-visible:ring-0 focus-visible:underline"
             asChild>
             <Link href={PATHS.SIGNUP}>Not signed up? Sign up now.</Link>
           </Button>
           <Button
             variant="link"
+            size="sm"
             className="px-0 focus-visible:ring-0 focus-visible:underline"
             asChild>
             <Link href={PATHS.RESET_PASSWORD}>Forgot Password?</Link>

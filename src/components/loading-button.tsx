@@ -1,7 +1,7 @@
 import React from "react";
 import { Button, ButtonProps } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { AnimatedSpinner } from "@/components/icons";
+import CircularLoader from "./circular-loader";
 
 type LoadingButtonProps = ButtonProps & {
   loading?: boolean;
@@ -19,7 +19,7 @@ const LoadingButton = React.forwardRef<HTMLButtonElement, LoadingButtonProps>(
 
         {loading ? (
           <div className="absolute inset-0 flex items-center justify-center">
-            <AnimatedSpinner className="size-6" />
+            <CircularLoader className="size-6" />
           </div>
         ) : null}
       </Button>

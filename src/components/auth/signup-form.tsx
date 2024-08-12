@@ -62,6 +62,7 @@ function SignupForm() {
                 <Input
                   placeholder="rashid"
                   {...field}
+                  disabled={isPending}
                 />
                 <FormMessage />
               </FormItem>
@@ -78,6 +79,7 @@ function SignupForm() {
                 <Input
                   placeholder="email@example.com"
                   {...field}
+                  disabled={isPending}
                 />
                 <FormMessage />
               </FormItem>
@@ -93,6 +95,7 @@ function SignupForm() {
                 <Label>Password</Label>
                 <PasswordInput
                   placeholder="********"
+                  disabled={isPending}
                   {...field}
                 />
                 <FormMessage />
@@ -103,6 +106,7 @@ function SignupForm() {
 
         <Button
           variant="link"
+          size="sm"
           asChild
           className="justify-start px-0 justify-self-start focus-visible:ring-0 focus-visible:underline">
           <Link href="/login">Already signed up? Login instead</Link>
