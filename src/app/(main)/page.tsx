@@ -7,6 +7,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import VerificationAlert from "@/components/verification-alert";
 import { PATHS } from "@/lib/constants";
 import { Metadata } from "next";
 import { redirect, RedirectType } from "next/navigation";
@@ -25,6 +26,7 @@ async function page() {
 
   return (
     <main className="grid min-h-screen place-items-center">
+      {!user.emailVerified && <VerificationAlert />}
       <Card className="w-full max-w-sm">
         <CardHeader className="text-center">
           <CardTitle>{user.username}</CardTitle>

@@ -2,9 +2,9 @@ import { validateRequest } from "@/auth";
 import { redirect, RedirectType } from "next/navigation";
 
 async function MainLayout({ children }: { children: React.ReactNode }) {
-  const { session } = await validateRequest();
+  const { user } = await validateRequest();
 
-  if (!session) {
+  if (!user) {
     redirect("/login", RedirectType.replace);
   }
 
