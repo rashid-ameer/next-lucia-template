@@ -13,6 +13,7 @@ import { useState, useTransition } from "react";
 import FormServerError from "./form-error";
 import SubmitButton from "./submit-button";
 import { login } from "@/actions/auth";
+import { PATHS } from "@/lib/constants";
 
 function LoginForm() {
   const [isPending, startTransition] = useTransition();
@@ -41,7 +42,7 @@ function LoginForm() {
       <form
         className="grid gap-4"
         onSubmit={form.handleSubmit(handleSubmit)}>
-        {isPending && error && (
+        {!isPending && error && (
           <FormServerError
             message={error}
             className="text-center"
@@ -82,13 +83,13 @@ function LoginForm() {
             variant="link"
             className="px-0 focus-visible:ring-0 focus-visible:underline"
             asChild>
-            <Link href="/signup">Not signed up? Sign up now.</Link>
+            <Link href={PATHS.SIGNUP}>Not signed up? Sign up now.</Link>
           </Button>
           <Button
             variant="link"
             className="px-0 focus-visible:ring-0 focus-visible:underline"
             asChild>
-            <Link href="/forgot-password">Forgot Password?</Link>
+            <Link href={PATHS.RESET_PASSWORD}>Forgot Password?</Link>
           </Button>
         </div>
 

@@ -58,7 +58,7 @@ export async function GET(request: NextRequest) {
         emailVerified: googleUser.verified_email,
       });
 
-      createSessionAndCookie(userId);
+      await createSessionAndCookie(userId);
 
       return new Response(null, {
         status: 302,
@@ -73,7 +73,7 @@ export async function GET(request: NextRequest) {
       emailVerified: existingUser.emailVerified || googleUser.verified_email,
     });
 
-    createSessionAndCookie(existingUser.id);
+    await createSessionAndCookie(existingUser.id);
 
     return new Response(null, {
       status: 302,

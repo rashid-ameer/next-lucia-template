@@ -9,8 +9,15 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import Link from "next/link";
 import { Button } from "../ui/button";
+import { useState, useTransition } from "react";
+import FormServerError from "./form-error";
+import { sendResetPasswordLink } from "@/actions/auth";
+import toast from "react-hot-toast";
+import SubmitButton from "./submit-button";
 
 function ForgotPassowordForm() {
+  const [error, setError] = useState("");
+  const [isPending, startTransition] = useTransition();
   const form = useForm<ForgotPasswordFormValues>({
     resolver: zodResolver(forgotPasswordFormSchema),
     defaultValues: {
@@ -18,11 +25,31 @@ function ForgotPassowordForm() {
     },
   });
 
+  // handle submit
+  const handleSubmit = (data: ForgotPasswordFormValues) => {
+    startTransition(async () => {
+      setError("");
+      const result = await sendResetPasswordLink(data);
+
+      if (!result) {
+        toast.success("Send reset link successfully");
+      } else if (result.error) {
+        setError(result.error);
+      }
+    });
+  };
+
   return (
     <Form {...form}>
       <form
         className="grid gap-4"
-        onSubmit={form.handleSubmit(() => {})}>
+        onSubmit={form.handleSubmit(handleSubmit)}>
+        {error && (
+          <FormServerError
+            message={error}
+            className="text-center"
+          />
+        )}
         <FormField
           name="email"
           control={form.control}
@@ -46,7 +73,7 @@ function ForgotPassowordForm() {
           <Link href="/signup">Not signed up? Sign up Now</Link>
         </Button>
 
-        <Button>Reset Password</Button>
+        <SubmitButton loading={isPending}>Reset Password</SubmitButton>
         <Button
           variant="secondary"
           asChild>

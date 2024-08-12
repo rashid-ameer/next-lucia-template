@@ -41,7 +41,7 @@ export async function GET(request: NextRequest) {
         emailVerified: true,
       });
 
-      createSessionAndCookie(userId);
+      await createSessionAndCookie(userId);
 
       return new Response(null, {
         status: 302,
@@ -56,7 +56,7 @@ export async function GET(request: NextRequest) {
       githubId: existingUser.githubId || githubUser.id,
     });
 
-    createSessionAndCookie(existingUser.id);
+    await createSessionAndCookie(existingUser.id);
 
     return new Response(null, {
       status: 302,

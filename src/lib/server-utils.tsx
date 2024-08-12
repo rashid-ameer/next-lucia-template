@@ -1,10 +1,16 @@
 import SignupVerificationEmail from "@/emails/signup-verification";
 import { sendEmail } from "@/lib/email";
-import { User } from "lucia";
+import { generateIdFromEntropySize, User } from "lucia";
 import prisma from "./prisma";
-import { isWithinExpirationDate } from "oslo";
+import { createDate, isWithinExpirationDate, TimeSpan } from "oslo";
 import { lucia } from "@/auth";
 import { cookies } from "next/headers";
+import {
+  createPasswordResetTokenEntry,
+  deleteAllPasswordResetTokens,
+} from "@/db/user";
+import { encodeHex } from "oslo/encoding";
+import { sha256 } from "oslo/crypto";
 
 export async function sendSignupVerificationEmail(
   email: string,
@@ -72,4 +78,26 @@ export function deleteSessionCookie() {
     sessionCookie.value,
     sessionCookie.attributes
   );
+}
+
+export async function createPasswordResetToken(userId: string) {
+  await deleteAllPasswordResetTokens(userId);
+
+  const tokenId = generateIdFromEntropySize(25); // 40 characters long
+  const tokenHash = encodeHex(await sha256(new TextEncoder().encode(tokenId)));
+
+  await createPasswordResetTokenEntry({
+    userId,
+    tokenHash,
+    expiresAt: createDate(new TimeSpan(2, "h")),
+  });
+
+  return tokenId;
+}
+
+export async function sendResetPasswordEmail(
+  email: string,
+  verificationLink: string
+) {
+  await sendEmail(email, "Password Rest Link", <p>{verificationLink}</p>);
 }

@@ -24,6 +24,7 @@ model User {
 
   sessions               Session[]
   emailVerificationCodes EmailVerificationCode[]
+  passwordResetTokens    PasswordResetToken[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -49,4 +50,15 @@ model EmailVerificationCode {
   expiresAt DateTime
 
   user User @relation(fields: [userId], references: [id])
+}
+
+model PasswordResetToken {
+  id        String   @id @default(cuid())
+  tokenHash String   @unique
+  userId    String
+  expiresAt DateTime
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@map("password_reset_tokens")
 }

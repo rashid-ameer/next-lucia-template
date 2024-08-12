@@ -1,5 +1,5 @@
 import prisma from "@/lib/prisma";
-import { User } from "@prisma/client";
+import { PasswordResetToken, User } from "@prisma/client";
 
 export async function getUserByEmail(email: string) {
   return await prisma.user.findUnique({
@@ -56,4 +56,17 @@ export async function updateUser(id: string, data: Partial<User>) {
     data,
   });
   return user;
+}
+
+export async function deleteAllPasswordResetTokens(userId: string) {
+  await prisma.passwordResetToken.deleteMany({
+    where: { userId },
+  });
+}
+
+export async function createPasswordResetTokenEntry(
+  data: Omit<PasswordResetToken, "id">
+) {
+  const token = await prisma.passwordResetToken.create({ data });
+  return token;
 }

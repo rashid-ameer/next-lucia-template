@@ -1,8 +1,16 @@
 "use server";
 
-import { getUserByEmail, insertUser, updateUserEmailStatus } from "@/db/user";
 import {
+  getUserByEmail,
+  insertUser,
+  updateUser,
+  updateUserEmailStatus,
+} from "@/db/user";
+import {
+  emailSchema,
+  forgotPasswordFormSchema,
   loginFormSchema,
+  resetPasswordFormSchema,
   signupFormSchema,
   verificationEmailCodeSchema,
 } from "@/lib/schemas";
@@ -14,11 +22,18 @@ import { cookies } from "next/headers";
 import { redirect, RedirectType } from "next/navigation";
 import { PATHS } from "@/lib/constants";
 import {
+  createPasswordResetToken,
   createSessionAndCookie,
+  createSessionCookie,
   deleteSessionCookie,
+  sendResetPasswordEmail,
   sendSignupVerificationEmail,
   verifyVerificationCode,
 } from "@/lib/server-utils";
+import prisma from "@/lib/prisma";
+import { encodeHex } from "oslo/encoding";
+import { sha256 } from "oslo/crypto";
+import { isWithinExpirationDate } from "oslo";
 
 export async function signup(data: unknown) {
   // validate the data
@@ -55,7 +70,7 @@ export async function signup(data: unknown) {
   const verificationCode = await generateEmailVerificationCode(userId, email);
   await sendSignupVerificationEmail(email, verificationCode);
 
-  createSessionAndCookie(userId);
+  await createSessionAndCookie(userId);
 
   return redirect(PATHS.VERIFY_EMAIL, RedirectType.replace);
 }
@@ -93,7 +108,7 @@ export async function login(data: unknown) {
     return { success: false, message: "Incorrect email or password" };
   }
 
-  createSessionAndCookie(user.id);
+  await createSessionAndCookie(user.id);
 
   return redirect(PATHS.HOME, RedirectType.replace);
 }
@@ -161,4 +176,80 @@ export async function resendEmailVerificationCode() {
   // send the email
   await sendSignupVerificationEmail(user.email, verificationCode);
   return { success: true };
+}
+
+export async function sendResetPasswordLink(data: unknown) {
+  const validationResult = forgotPasswordFormSchema.safeParse(data);
+
+  if (!validationResult.success) {
+    return { error: "Invalid Email" };
+  }
+
+  const { email } = validationResult.data;
+
+  const user = await getUserByEmail(email);
+
+  if (!user) {
+    return { error: "Invalid Email" };
+  }
+
+  const verificationToken = await createPasswordResetToken(user.id);
+  const verificationLink = `${process.env.NEXT_PUBLIC_BASE_URL}/reset-password/${verificationToken}`;
+
+  await sendResetPasswordEmail(email, verificationLink);
+
+  return redirect(PATHS.LOGIN);
+}
+
+export async function resetPassword(data: unknown) {
+  const parsed = resetPasswordFormSchema.safeParse(data);
+  if (!parsed.success) {
+    const errors = parsed.error.flatten();
+    return {
+      error: errors.fieldErrors.password?.[0] ?? errors.fieldErrors.token?.[0],
+    };
+  }
+
+  const { token, password } = parsed.data;
+
+  // create a token hash
+  const tokenHash = encodeHex(await sha256(new TextEncoder().encode(token)));
+
+  // delete the token entry
+  const dbToken = await prisma.$transaction(async (prisma) => {
+    const item = await prisma.passwordResetToken.findUnique({
+      where: {
+        tokenHash,
+      },
+    });
+
+    if (item) {
+      await prisma.passwordResetToken.delete({
+        where: {
+          id: item.id,
+        },
+      });
+    }
+
+    return item;
+  });
+
+  // if token is not present or already has been expired
+  if (!dbToken || !isWithinExpirationDate(dbToken.expiresAt)) {
+    return { error: "Invalid token" };
+  }
+
+  await lucia.invalidateUserSessions(dbToken.userId);
+  const passwordHash = await hash(password, {
+    // recommended minimum parameters
+    memoryCost: 19456,
+    timeCost: 2,
+    outputLen: 32,
+    parallelism: 1,
+  });
+
+  await updateUser(dbToken.userId, { passwordHash });
+
+  await createSessionAndCookie(dbToken.userId);
+  redirect(PATHS.LOGIN, RedirectType.replace);
 }
