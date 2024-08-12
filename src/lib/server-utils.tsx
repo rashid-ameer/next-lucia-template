@@ -12,6 +12,7 @@ import {
 import { encodeHex } from "oslo/encoding";
 import { sha256 } from "oslo/crypto";
 import { hash, verify } from "@node-rs/argon2";
+import ResetPassword from "@/emails/reset-password";
 
 export async function sendSignupVerificationEmail(
   email: string,
@@ -100,7 +101,11 @@ export async function sendResetPasswordEmail(
   email: string,
   verificationLink: string
 ) {
-  await sendEmail(email, "Password Rest Link", <p>{verificationLink}</p>);
+  await sendEmail(
+    email,
+    "Password Rest Link",
+    <ResetPassword verificationLink={verificationLink} />
+  );
 }
 
 export async function checkPasswordValidity(
